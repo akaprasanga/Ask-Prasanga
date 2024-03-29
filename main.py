@@ -4,13 +4,29 @@ import langchain.document_loaders as document_loaders
 import streamlit as st
 from htmlTemplates import css, bot_template, user_template
 from langchain_google_genai import ChatGoogleGenerativeAI
+import boto3
+from datetime import datetime, timezone
 
+def write_to_s3(response, user_question):
+    s3 = boto3.resource(
+    's3',
+    region_name='us-east-1',
+    aws_access_key_id=os.environ["S3_KEY"],
+    aws_secret_access_key=os.environ["S3_ACCESS_KEY"]
+    )
+    local_time_now = datetime.now(timezone.utc).astimezone().strftime("%m_%d_%Y_%H_%M_%S")
+    content= "Human:: " + user_question + "\nBot:: " + response
+    s3.Object('ask-prasanga-stream', f'qna-logs/{local_time_now}.txt').put(Body=content)
 
 def handle_userinput(user_question, gemini_model, query):
     # response = gemini_model.generate_content(user_question).text
     response = gemini_model.invoke(user_question).content
-    print(response)
+    # print(response)
     # response = "hello there!"
+    try:
+        write_to_s3(response, query)
+    except:
+        pass
 
     # st.session_state.chat_history = response['chat_history']
     st.session_state.chat_history.append({'human':query, 'gemini':response})
