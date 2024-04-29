@@ -76,7 +76,23 @@ def main():
 
     if user_question:
 
-        prompt_parts = f"Here is the resume of Prasanga Neupane inside ticks.`{cv_document}`.Based on his resume, answer the following question inside ticks.`{user_question}`. Provide example(s) from resume when possible. Do not make your own answers outside of given resume.If you dont find answer wihtin the given resume, reply with 'Sorry. I do not have that information. Please try to keep your questions around Prasanga's career.'"
+        prompt_parts = f"""
+        Here is the resume of Prasanga Neupane inside triple # signs.
+
+        ### RESUME START ###
+        {cv_document}
+        ### RSUME END ###
+
+        Based on his resume above, answer the following question inside ticks `{user_question}`.
+        ### INSTRUCTIONS FOR ANSWERING QUESTION ### 
+        1) Always provide relevant details from resume while providing response.
+        2) If user asks question using the 'You' pronoun, answer on behalf of Prasanga. For example:
+            Q: Do you have any LLM experience?
+            A: Yes, Prasanga has LLM experience <and fill in the details from resume here>
+        3) Do not use "I" as a first person noun while replying, always use "Prasanga".
+        4) Do not make your own answers outside of given resume.If you dont find answer wihtin the given resume,
+        reply with this exact statement "Sorry. I do not have that information. Please try to keep your questions around Prasanga's career."
+        """
 
         handle_userinput(prompt_parts, gemini_model, user_question)
     
