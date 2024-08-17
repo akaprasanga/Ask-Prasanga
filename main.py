@@ -5,7 +5,6 @@ import streamlit as st
 from htmlTemplates import css, bot_template, user_template
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-
 def handle_userinput(user_question, gemini_model, query):
     # response = gemini_model.generate_content(user_question).text
     response = gemini_model.invoke(user_question).content
@@ -32,7 +31,7 @@ def main():
     # gemini_model = genai.GenerativeModel(model_name = "gemini-pro")
     gemini_model = ChatGoogleGenerativeAI(model="gemini-pro")
     
-    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_3_24.docx")
+    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_4_24.docx")
     cv_document = cv_document.load()[0].page_content
 
     st.set_page_config(page_title="Ask-Prasanga",
@@ -47,7 +46,7 @@ def main():
 
 
     st.header("Ask any questions you would like to know about Prasanga's career.")
-    user_question = st.text_input("Example question: Where is Prasanga currently working at?")
+    user_question = st.text_input("Example question: Where is Prasanga currently working at?", key="text_input_box")
 
     with st.sidebar:
         st.header(r"$\textsf{\huge Ask-Prasanga}$")
@@ -65,16 +64,16 @@ def main():
 
         ### RESUME START ###
         {cv_document}
-        ### RSUME END ###
+        ### RESUME END ###
 
         Based on his resume above, answer the following question inside ticks `{user_question}`.
-        ### INSTRUCTIONS FOR ANSWERING QUESTION ### 
+        ### INSTRUCTIONS FOR ANSWERING QUESTIONS ### 
         1) Always provide relevant details from resume while providing response.
         2) If user asks question using the 'You' pronoun, answer on behalf of Prasanga. For example:
             Q: Do you have any LLM experience?
-            A: Yes, Prasanga has LLM experience <and fill in the details from resume here>
+            A: Yes, Prasanga has LLM experience and <fill in the details from resume here>
         3) Do not use "I" as a first person noun while replying, always use "Prasanga".
-        4) Do not make your own answers outside of given resume.If you dont find answer wihtin the given resume,
+        4) Do not make your own answers outside of given resume.If you dont find answer within the given resume,
         reply with this exact statement "Sorry. I do not have that information. Please try to keep your questions around Prasanga's career."
         """
 
