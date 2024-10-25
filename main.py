@@ -31,7 +31,7 @@ def handle_userinput(user_question, gemini_model, query):
 
     # st.session_state.chat_history = response['chat_history']
     st.session_state.chat_history.append({'human':query, 'gemini':response})
-    print("Chat history::",st.session_state.chat_history)
+    # print("Chat history::",st.session_state.chat_history)
 
     for i, message in enumerate(list(reversed(st.session_state.chat_history))):
 
@@ -41,6 +41,10 @@ def handle_userinput(user_question, gemini_model, query):
         st.write(bot_template.replace(
                 "{{MSG}}", message['gemini']), unsafe_allow_html=True)
 
+def clear_conversation():
+    # print("Clearing Conversation!")
+    st.session_state["text_input_box"] = ""
+    st.session_state.clear()
 
 def main():
     load_dotenv()
@@ -49,7 +53,7 @@ def main():
     # gemini_model = genai.GenerativeModel(model_name = "gemini-pro")
     gemini_model = ChatGoogleGenerativeAI(model="gemini-pro")
     
-    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_4_24.docx")
+    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_8_19.docx")
     cv_document = cv_document.load()[0].page_content
 
     st.set_page_config(page_title="Ask-Prasanga",
@@ -65,6 +69,8 @@ def main():
 
     st.header("Ask any questions you would like to know about Prasanga's career.")
     user_question = st.text_input("Example question: Where is Prasanga currently working at?", key="text_input_box")
+
+    st.button("Clear Conversation", key="click_button_1", on_click=clear_conversation)
 
     with st.sidebar:
         st.header(r"$\textsf{\huge Ask-Prasanga}$")
@@ -91,7 +97,10 @@ def main():
             Q: Do you have any LLM experience?
             A: Yes, Prasanga has LLM experience and <fill in the details from resume here>
         3) Do not use "I" as a first person noun while replying, always use "Prasanga".
-        4) Do not make your own answers outside of given resume.If you dont find answer within the given resume,
+        4) While answering questions always include relevant experiences or example from resume in the response. For example:
+            Q: Does Prasanga has any LLM experience?
+            A: Yes. He implemented <relevant LLM project(s) from resume here>
+        5) Do not make your own answers outside of given resume.If you dont find answer within the given resume,
         reply with this exact statement "Sorry. I do not have that information. Please try to keep your questions around Prasanga's career."
         """
 
