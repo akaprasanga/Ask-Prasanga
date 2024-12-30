@@ -70,6 +70,11 @@ def create_prompt(cv_document, user_question):
     """
     return prompt_parts
 
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
 def main():
     load_dotenv()
     if "GOOGLE_API_KEY" not in os.environ:
@@ -123,5 +128,18 @@ def main():
         st.write(bot_template.replace(
                 "{{MSG}}", message['gemini']), unsafe_allow_html=True)
     
+
+
+# ---------------- CSS ----------------
+
+    local_css("style.css")
+
+    
+    f = open("cards.txt")
+
+    st.markdown(str(f.read()), unsafe_allow_html=True)
+
+    f.close()
+
 if __name__ == '__main__':
     main()
