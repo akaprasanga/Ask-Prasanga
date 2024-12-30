@@ -1,0 +1,24 @@
+<div class="card-groups">
+    <div class="card-group" data-index="0" data-status="active">
+        <div class="little-card card">
+        </div>
+        <div class="big-card card">
+         <a id="link" href="https://scholar.google.com/citations?user=aMwhniAAAAAJ&hl=en" class="fill-div"></a>
+        </div>
+        <div class="little-card card">
+        </div>
+        <div class="big-card card">
+        <a id="link" href="https://www.linkedin.com/in/prasanga-neupane/" class="fill-div"></a>
+        </div>
+        <div class="little-card card">
+        </div>
+        <div class="big-card card">
+        <a id="link" href="https://docs.google.com/document/d/1f04RA0RgL8DlJkDrZ4DulvMEr1IQb_Bl/edit?usp=sharing&ouid=115265904728291975618&rtpof=true&sd=true" class="fill-div"></a>
+        </div>
+        <div class="little-card card">
+        </div>
+        <div class="big-card card">
+        <a id="link" href="https://github.com/akaprasanga/" class="fill-div"></a>
+        </div>
+    </div>
+</div>
