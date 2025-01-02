@@ -13,7 +13,7 @@
         <div class="little-card card">
         </div>
         <div class="big-card card">
-        <a id="link" href="https://docs.google.com/document/d/1f04RA0RgL8DlJkDrZ4DulvMEr1IQb_Bl/edit?usp=sharing&ouid=115265904728291975618&rtpof=true&sd=true" class="fill-div"></a>
+        <a id="link" href="https://akaprasanga.github.io/" class="fill-div"></a>
         </div>
         <div class="little-card card">
         </div>
