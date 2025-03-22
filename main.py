@@ -80,7 +80,7 @@ def main():
     if "GOOGLE_API_KEY" not in os.environ:
         os.environ["GOOGLE_API_KEY"] = os.environ.get("GOOGLE_API_KEY")
     # gemini_model = genai.GenerativeModel(model_name = "gemini-pro")
-    gemini_model = ChatGoogleGenerativeAI(model="gemini-pro")
+    gemini_model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_8_19.docx")
     cv_document = cv_document.load()[0].page_content
 
@@ -115,7 +115,7 @@ def main():
         st.header(r"$\textsf{\huge Ask-Prasanga}$")
         st.subheader('  :computer: Personal Chat Assistant :computer:')
         st.markdown("""---""")
-        st.subheader("This is an AI-powered personalized chatbot developed by Prasanga Neupane, specifically curated to answer queries regarding Prasanga's professional career. This chatbot utilizes Google's Gemini-Pro LLM to generate responses.")
+        st.subheader("This is an AI-powered personalized chatbot developed by Prasanga Neupane, specifically curated to answer queries regarding Prasanga's professional career. This chatbot utilizes Google's Gemini LLM to generate responses.")
         st.write("  If you would like to verify the authenticity of the generated responses, please feel free to visit Prasanga's :linked_paperclips: [Linkedin](%s) profile." %"https://www.linkedin.com/in/prasanga-neupane/")
         st.write("---")
         st.write(":copyright: Developed by Prasanga Neupane, 2024")
