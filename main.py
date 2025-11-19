@@ -20,24 +20,46 @@ def write_to_s3(response, user_question):
 
 
 def handle_userinput(prompt, gemini_model, query):
-    # response = gemini_model.generate_content(user_question).text
+    # Display user message immediately
+    st.write(user_template.replace("{{MSG}}", query), unsafe_allow_html=True)
+    
+    # Stream the response
     try:
-        response = gemini_model.invoke(prompt).content
+        # Create a placeholder for the bot response
+        bot_placeholder = st.empty()
+        
+        # Stream the response and collect it
+        full_response = ""
+        stream = gemini_model.stream(prompt)
+        
+        # Display streamed chunks
+        for chunk in stream:
+            if hasattr(chunk, 'content') and chunk.content:
+                full_response += chunk.content
+                # Update the placeholder with the accumulated response
+                bot_placeholder.write(bot_template.replace("{{MSG}}", full_response), unsafe_allow_html=True)
+        
+        response = full_response
+        
     except Exception as error:
         response = """
         Sorry, I am unable to connect to the Gemini server right now!!! <br><br>
         I will let Prasanga know about this issue ASAP.
         Please feel free to contact him with your queries at 'akaprasanganeupane@gmail.com'.
         """
+        bot_placeholder = st.empty()
+        bot_placeholder.write(bot_template.replace("{{MSG}}", response), unsafe_allow_html=True)
         print("Error::", error)
-    # print(response)
-    # response = "hello there!"
+    
+    # Save to S3 and chat history
     try:
         write_to_s3(response, query)
     except Exception as error:
         print("Failed to write in S3.", error)    
 
     st.session_state.chat_history.append({'human':query, 'gemini':response})
+    # Mark that we just displayed a new message to avoid duplication
+    st.session_state.last_displayed_index = len(st.session_state.chat_history) - 1
     # print("Chat history::",st.session_state.chat_history)
 
 
@@ -47,26 +69,29 @@ def clear_conversation():
 
 def create_prompt(cv_document, user_question):
     prompt_parts = f"""
-    You are an expert on Prasanga Neupane's carrrer and here is his resume inside triple # signs.
+    You are an expert on Prasanga Neupane's carrrer and you have access to his resume below. You have to answer the question based on his resume. 
+    You can infer relevant experience from the resume but do not make up answers on your own.
+
+    ### INSTRUCTIONS FOR ANSWERING QUESTIONS
+    1) Before answering question find relevant details from the resume. Then write your response based on the details you found.
+    2) Always cite relevant exmaples and details from resume while providing response but avoid using terms like based on his resume.
+    3) If user asks question using the 'You' pronoun, answer on behalf of Prasanga. For example:
+        Q: Do you have any LLM experience?
+        A: Yes, Prasanga has LLM experience and <cite the details from resume here>
+    4) Do not use "I" as a first person noun while responding, always use "Prasanga".
+    5) While answering questions always include relevant experiences or example from resume in the response. For example:
+        Q: Does Prasanga has any LLM experience?
+        A: Yes. He implemented <relevant LLM project(s) from resume here>
+    6) Do not make up your own answers outside of given resume. 
+    7) If you dont find answer within the given resume, reply with this exact statement "Sorry. I do not have that information. Please try to keep your questions around Prasanga's career. \n If you need to reach out to Prasanga with this question feel free to reach out to him at 'akaprasanganeupane@gmail.com'."
+    8) Do not wrap your responses with ticks(`) or quotes(', ").
+    7) Try to respond back in natural language so that its pleasing for the user to read. Please use <br> instead of new line in response.
 
     ### RESUME START ###
     {cv_document}
     ### RESUME END ###
 
-    Based on his resume above, answer the following question inside ticks `{user_question}`.
-    ### INSTRUCTIONS FOR ANSWERING QUESTIONS ### 
-    1) Always provide relevant exmaples and details from resume while providing response but avoid using terms like based on his resume.
-    2) If user asks question using the 'You' pronoun, answer on behalf of Prasanga. For example:
-        Q: Do you have any LLM experience?
-        A: Yes, Prasanga has LLM experience and <fill in the details from resume here>
-    3) Do not use "I" as a first person noun while replying, always use "Prasanga".
-    4) While answering questions always include relevant experiences or example from resume in the response. For example:
-        Q: Does Prasanga has any LLM experience?
-        A: Yes. He implemented <relevant LLM project(s) from resume here>
-    5) Do not make your own answers outside of given resume.If you dont find answer within the given resume,
-    reply with this exact statement "Sorry. I do not have that information. Please try to keep your questions around Prasanga's career. \n If you need to reach out to Prasanga with this question feel free to reach out to him at 'akaprasanganeupane@gmail.com'."
-    6) Do not wrap your responses with ticks(`) or quotes(', ").
-    7) Try to respond back in natural language so that its pleasing for the user to read. Please use <br> instead of new line in response.
+    Based on Prasanga's resume above, answer the following question inside ticks `{user_question}`.
     """
     return prompt_parts
 
@@ -81,7 +106,7 @@ def main():
         os.environ["GOOGLE_API_KEY"] = os.environ.get("GOOGLE_API_KEY")
     # gemini_model = genai.GenerativeModel(model_name = "gemini-pro")
     gemini_model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_DE_8_19.docx")
+    cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_11_12_2025_AI_Engineer.docx")
     cv_document = cv_document.load()[0].page_content
 
     st.set_page_config(page_title="Ask-Prasanga",
@@ -120,8 +145,20 @@ def main():
         st.write("---")
         st.write(":copyright: Developed by Prasanga Neupane, 2024")
     
-    for i, message in enumerate(list(reversed(st.session_state.chat_history))):
-
+    # Display chat history (excluding the last message if it was just displayed during streaming)
+    chat_history_to_display = list(reversed(st.session_state.chat_history))
+    last_displayed = st.session_state.get("last_displayed_index", -1)
+    if last_displayed >= 0 and chat_history_to_display:
+        # Calculate which message in reversed list corresponds to last_displayed
+        # Since list is reversed, index 0 is the last message in chat_history
+        total_messages = len(st.session_state.chat_history)
+        if last_displayed == total_messages - 1:
+            # Last message was just displayed, skip it to avoid duplication
+            chat_history_to_display = chat_history_to_display[1:]
+            # Reset the flag after using it
+            st.session_state.last_displayed_index = -1
+    
+    for i, message in enumerate(chat_history_to_display):
         st.write(user_template.replace(
                 "{{MSG}}", message['human']), unsafe_allow_html=True)
 
