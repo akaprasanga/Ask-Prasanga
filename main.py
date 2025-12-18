@@ -105,7 +105,7 @@ def main():
     if "GOOGLE_API_KEY" not in os.environ:
         os.environ["GOOGLE_API_KEY"] = os.environ.get("GOOGLE_API_KEY")
     # gemini_model = genai.GenerativeModel(model_name = "gemini-pro")
-    gemini_model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+    gemini_model = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
     cv_document = document_loaders.Docx2txtLoader("Prasanga_CV_11_12_2025_AI_Engineer.docx")
     cv_document = cv_document.load()[0].page_content
 
